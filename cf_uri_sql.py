@@ -1,8 +1,8 @@
 #!/usr/bin/python
 #: Title       : Cofense Triage API
-#: Date Created: Mon Aug 26 2019
+#: Date Created: Mon Sep 4th 2019
 #: Author      : Charley Pfaff
-#: Description : API used to query Cofense to file
+#: Description : API used to query Cofense to file and database
 #
 # --------------------------------------------------------------
 #
@@ -66,7 +66,11 @@ def single_query(args):
                 pass
             else:
                 print "woot new domain"
+                print ct_url
                 c.execute("INSERT INTO domains VALUES (?)", (ct_url,))
+                g = open('/tmp/new_uri.txt', 'a')
+                g.write(ct_url)
+                g.close
 
       conn.commit()
       conn.close()
