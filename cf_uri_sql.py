@@ -14,6 +14,9 @@
 # Minimal Python libraries including json , triagelib also 
 # pip install git+https://github.com/jblackb1/triagelib@master
 # 
+# example usage: 
+# python ./cf_uri_sql.py -p 55555555555555555555555555 -t 05/09/2019T23:00 -u user@company.com -i servername.company.com
+#
 # What this does is:
 # 1.logs into Cofense Triage
 # 2.performs a defined search
@@ -43,8 +46,6 @@ import sqlite3
 from sqlite3 import Error
 import datetime 
 
-
-
 def single_query(args):
    triage = TriageSession(host=args.host_name, email=args.username, apikey=args.token)
    f = open(args.file_location, 'w')
@@ -52,7 +53,7 @@ def single_query(args):
    reports = "placeholder"
    while reports and count < 40:
       reports = triage.inbox_reports(start_date=args.start_date, per_page=args.per_page, page=(count))
-      conn = sqlite3.connect('./capture.db')
+      conn = sqlite3.connect(args.uri_db_location)
       c=conn.cursor()
       conn.text_factory = str
       time.sleep(15)
@@ -62,8 +63,9 @@ def single_query(args):
             ct_url = y['url']
             rep_url = x['reported_at']
             rep_sub = x['report_subject']
-            rep_subject = rep_sub.encode('utf-8', 'replace' ).replace("," , "").strip()
-            f.write(rep_url.encode('utf-8') + ' , ' + rep_sub.encode('utf-8').replace("," , "") + ' , ' + ct_url.encode('utf-8') + '\n')
+            #rep_subject = rep_sub.encode('utf-8', 'replace' ).replace("," , "").strip()
+            f.write(rep_url.encode('utf-8') + ' , ' 
+                    + rep_sub.encode('utf-8').replace("," , "") + ' , ' + ct_url.encode('utf-8') + '\n')
             c.execute("""SELECT uri FROM domains WHERE uri=?""",(ct_url,))
             result = c.fetchone()
             if result:
@@ -72,9 +74,9 @@ def single_query(args):
                 print "woot new domain"
                 print ct_url
                 currentDT = datetime.datetime.now()
-                c.execute("INSERT INTO domains VALUES (?, ?, ?)", (ct_url, currentDT, rep_subject))
-                g = open('/tmp/new_uri.txt', 'a')
-                g.write(ct_url + ' , '+ (str(currentDT)) + rep_sub.encode('utf-8').replace("," , "") + '\n')
+                c.execute("INSERT INTO domains VALUES (?, ?, ?)", (ct_url, currentDT, rep_sub))
+                g = open(args.uri_file_location, 'a')
+                g.write(ct_url.encode('utf-8') + ' , '+ (str(currentDT)) + rep_sub.encode('utf-8').replace("," , "") + '\n')
                 g.close
 
       conn.commit()
@@ -100,7 +102,13 @@ def main():
         help="the Triage that you want to query default:servername.lan")
    parser.add_argument("-l", "--file_location",
         action="store", default="/tmp/cf_results.txt",
-        help="the location you want the output stored default: /tmp/cf_results.txt")
+        help="the location you want the raw output stored default: /tmp/cf_results.txt")
+   parser.add_argument("-f", "--uri_file_location",
+        action="store", default="/tmp/cf_new_uri_results.txt",
+        help="the location you want the output for new uri's stored default: /tmp/cf_new_uri_results.txt")
+   parser.add_argument("-q", "--uri_db_location",
+        action="store", default="/tmp/capture.db",
+        help="the location you want the db for new uri's stored default: /tmp/capture.db")
    parser.add_argument("-s", "--server_list",
         action="store", default="single",
         help="type of query to user single or all  default: single")
