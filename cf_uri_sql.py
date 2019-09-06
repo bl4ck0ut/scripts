@@ -52,8 +52,9 @@ def single_query(args):
    reports = "placeholder"
    while reports and count < 40:
       reports = triage.inbox_reports(start_date=args.start_date, per_page=args.per_page, page=(count))
-      conn = sqlite3.connect('./tutorial.db')
+      conn = sqlite3.connect('./capture.db')
       c=conn.cursor()
+      conn.text_factory = str
       time.sleep(15)
       for x in reports:
          cof_urls = x['email_urls']
@@ -61,6 +62,7 @@ def single_query(args):
             ct_url = y['url']
             rep_url = x['reported_at']
             rep_sub = x['report_subject']
+            rep_subject = rep_sub.encode('utf-8', 'replace' ).replace("," , "").strip()
             f.write(rep_url.encode('utf-8') + ' , ' + rep_sub.encode('utf-8').replace("," , "") + ' , ' + ct_url.encode('utf-8') + '\n')
             c.execute("""SELECT uri FROM domains WHERE uri=?""",(ct_url,))
             result = c.fetchone()
@@ -70,9 +72,9 @@ def single_query(args):
                 print "woot new domain"
                 print ct_url
                 currentDT = datetime.datetime.now()
-                c.execute("INSERT INTO domains VALUES (?, ?)", (ct_url, currentDT))
+                c.execute("INSERT INTO domains VALUES (?, ?, ?)", (ct_url, currentDT, rep_subject))
                 g = open('/tmp/new_uri.txt', 'a')
-                g.write(ct_url + ' , '+ (str(currentDT)) + '\n')
+                g.write(ct_url + ' , '+ (str(currentDT)) + rep_sub.encode('utf-8').replace("," , "") + '\n')
                 g.close
 
       conn.commit()
