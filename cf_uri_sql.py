@@ -22,10 +22,11 @@
 # -----------------------------------------------------------------------
 #
 # improvments
-# - add time and date range as variable
+# 
+# - add alerting to email capability
 # - add fields to be reported 
 # - read initial rquest and parge last page as loop variable
-# - Many many more
+# 
 #
 #
 # --------------------------------------------------------------
@@ -40,6 +41,7 @@ import time, sys
 import argparse
 import sqlite3
 from sqlite3 import Error
+import datetime 
 
 
 
@@ -67,9 +69,10 @@ def single_query(args):
             else:
                 print "woot new domain"
                 print ct_url
-                c.execute("INSERT INTO domains VALUES (?)", (ct_url,))
+                currentDT = datetime.datetime.now()
+                c.execute("INSERT INTO domains VALUES (?, ?)", (ct_url, currentDT))
                 g = open('/tmp/new_uri.txt', 'a')
-                g.write(ct_url)
+                g.write(ct_url + ' , '+ (str(currentDT)) + '\n')
                 g.close
 
       conn.commit()
