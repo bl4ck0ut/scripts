@@ -53,6 +53,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
 
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEBase import MIMEBase
+from email import Encoders
+
 
 def send_mail(args):
 
@@ -64,19 +68,22 @@ def send_mail(args):
    New domains or URI's detected see attached.
    """
 
+   SUBJECT = "New Phishing domains detected"
+   msg = MIMEMultipart()
+   msg['Subject'] = SUBJECT
+   msg['From'] = sender
+   msg['To'] = ', '.join(receivers)
+   part = MIMEBase('application', "octet-stream")
+   part.set_payload(open(args.uri_file_location, "rb").read())
+   Encoders.encode_base64(part)
+   part.add_header('Content-Disposition', 'attachment; filename="uri.txt"')
+   msg.attach(part)
+
    try:
       smtpObj = smtplib.SMTP(args.email_forwarder)
-      print args.email_forwarder
-      print sender
-      print receivers
-      print message
-      smtpObj.sendmail(sender, receivers, message)         
+      smtpObj.sendmail(sender, receivers, msg.as_string())         
       print "Successfully sent email"
    except:
-      print args.email_forwarder
-      print sender
-      print receivers
-      print message
       print "Error: unable to send email"
 
 def single_query(args):
