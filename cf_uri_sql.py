@@ -46,6 +46,31 @@ import sqlite3
 from sqlite3 import Error
 import datetime 
 
+import smtplib
+from os.path import basename
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import COMMASPACE, formatdate
+
+
+def send_mail(args):
+
+   sender = 'gz4kg3@ubuntu'
+   receivers = ['gz4kg3@ubuntu']
+   message = """From: From Person <from@fromdomain.com>
+   To: To Person <to@todomain.com>
+   Subject: SMTP e-mail test
+   This is a test e-mail message.
+   """
+
+   try:
+      smtpObj = smtplib.SMTP('127.0.0.1')
+      smtpObj.sendmail(sender, receivers, message)         
+      print "Successfully sent email"
+   except:
+      print "Error: unable to send email"
+
 def single_query(args):
    triage = TriageSession(host=args.host_name, email=args.username, apikey=args.token)
    f = open(args.file_location, 'w')
@@ -84,7 +109,7 @@ def single_query(args):
       print count
       count += 1
    f.close
-
+   send_mail(args)
 
 
 def main():
