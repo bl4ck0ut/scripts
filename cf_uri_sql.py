@@ -56,19 +56,27 @@ from email.utils import COMMASPACE, formatdate
 
 def send_mail(args):
 
-   sender = 'gz4kg3@ubuntu'
-   receivers = ['gz4kg3@ubuntu']
-   message = """From: From Person <from@fromdomain.com>
-   To: To Person <to@todomain.com>
-   Subject: SMTP e-mail test
-   This is a test e-mail message.
+   sender = args.email_sender
+   receivers = args.email_rcpt
+   message = """From: From sender <sender@ubuntu>
+   To: To Person <rcpt.person@todomain.com>
+   Subject: New Domains detected
+   New domains or URI's detected see attached.
    """
 
    try:
-      smtpObj = smtplib.SMTP('127.0.0.1')
+      smtpObj = smtplib.SMTP(args.email_forwarder)
+      print args.email_forwarder
+      print sender
+      print receivers
+      print message
       smtpObj.sendmail(sender, receivers, message)         
       print "Successfully sent email"
    except:
+      print args.email_forwarder
+      print sender
+      print receivers
+      print message
       print "Error: unable to send email"
 
 def single_query(args):
@@ -109,7 +117,6 @@ def single_query(args):
       print count
       count += 1
    f.close
-   send_mail(args)
 
 
 def main():
@@ -143,6 +150,17 @@ def main():
    parser.add_argument("-t", "--start_date",
         action="store", default="01/07/2019T00:00",
         help="This is how far to go back by start date default:01/07/2019T00:00")
+   parser.add_argument("-e", "--email_sender",
+        action="store", default="sender@sending.domain.com",
+        help="Who you want the sender to look like")
+   parser.add_argument("-g", "--email_rcpt",
+        action="store", default="rcpt@recieving.domain.com",
+        help="Who you would like to have the emails sent to")
+   parser.add_argument("-j", "--email_forwarder",
+        action="store", default="127.0.0.1",
+        help="Server used as forwarder")
+   
+   
    args = parser.parse_args()
   
    if not args.username:
@@ -153,6 +171,7 @@ def main():
  
    if args.server_list == 'single':
       single_query(args)
+      send_mail(args)
 
 if __name__ == '__main__':
    main()
