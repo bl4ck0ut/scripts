@@ -45,14 +45,13 @@ import argparse
 import sqlite3
 from sqlite3 import Error
 import datetime 
-
+import os
 import smtplib
 from os.path import basename
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
-
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
 from email import Encoders
@@ -89,6 +88,10 @@ def send_mail(args):
 
 def single_query(args):
    triage = TriageSession(host=args.host_name, email=args.username, apikey=args.token)
+   if os.path.exists(args.uri_file_location):
+       os.remove(args.uri_file_location)
+   else:
+       print('File does not exists')
    f = open(args.file_location, 'w')
    count=1
    reports = "placeholder"
@@ -116,10 +119,6 @@ def single_query(args):
                 print ct_url
                 currentDT = datetime.datetime.now()
                 c.execute("INSERT INTO domains VALUES (?, ?, ?)", (ct_url, currentDT, rep_sub))
-                if os.path.exists(args.uri_file_location):
-                    os.remove(args.uri_file_location)
-                else:
-                    print('File does not exists')
                 g = open(args.uri_file_location, 'a')
                 g.write(ct_url.encode('utf-8') + ' , '+ (str(currentDT)) + rep_sub.encode('utf-8').replace("," , "") + '\n')
                 g.close
