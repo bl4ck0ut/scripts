@@ -86,6 +86,7 @@ def send_mail(args):
    except:
       print "Error: unable to send email"
 
+
 def single_query(args):
    triage = TriageSession(host=args.host_name, email=args.username, apikey=args.token)
    f = open(args.file_location, 'w')
@@ -115,6 +116,10 @@ def single_query(args):
                 print ct_url
                 currentDT = datetime.datetime.now()
                 c.execute("INSERT INTO domains VALUES (?, ?, ?)", (ct_url, currentDT, rep_sub))
+                if os.path.exists(args.uri_file_location):
+                    os.remove(args.uri_file_location)
+                else:
+                    print('File does not exists')
                 g = open(args.uri_file_location, 'a')
                 g.write(ct_url.encode('utf-8') + ' , '+ (str(currentDT)) + rep_sub.encode('utf-8').replace("," , "") + '\n')
                 g.close
