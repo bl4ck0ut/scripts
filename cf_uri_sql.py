@@ -13,6 +13,7 @@
 # requirnemts:
 # Minimal Python libraries including json , triagelib also 
 # pip install git+https://github.com/jblackb1/triagelib@master
+# create slite database with schema "CREATE TABLE domains(uri text, rcv_date text, rcv_subject text);"
 # 
 # example usage: 
 # python ./cf_uri_sql.py -p 55555555555555555555555555 -t 05/09/2019T23:00 -u user@company.com -i servername.company.com
@@ -26,10 +27,9 @@
 #
 # improvments
 # 
-# - add alerting to email capability
 # - add fields to be reported 
 # - read initial rquest and parge last page as loop variable
-# 
+# - add python sqlite db creation versus manual db creation 
 #
 #
 # --------------------------------------------------------------
@@ -92,7 +92,7 @@ def single_query(args):
        os.remove(args.uri_file_location)
    else:
        print('File does not exists')
-   f = open(args.file_location, 'w')
+   f = open(args.file_location, 'w+')
    count=1
    reports = "placeholder"
    while reports and count < 40:
@@ -107,7 +107,6 @@ def single_query(args):
             ct_url = y['url']
             rep_url = x['reported_at']
             rep_sub = x['report_subject']
-            #rep_subject = rep_sub.encode('utf-8', 'replace' ).replace("," , "").strip()
             f.write(rep_url.encode('utf-8') + ' , ' 
                     + rep_sub.encode('utf-8').replace("," , "") + ' , ' + ct_url.encode('utf-8') + '\n')
             c.execute("""SELECT uri FROM domains WHERE uri=?""",(ct_url,))
@@ -119,8 +118,9 @@ def single_query(args):
                 print ct_url
                 currentDT = datetime.datetime.now()
                 c.execute("INSERT INTO domains VALUES (?, ?, ?)", (ct_url, currentDT, rep_sub))
-                g = open(args.uri_file_location, 'a')
-                g.write(ct_url.encode('utf-8') + ' , '+ (str(currentDT)) + rep_sub.encode('utf-8').replace("," , "") + '\n')
+                g = open(args.uri_file_location, 'a+')
+                g.write(ct_url.encode('utf-8') + ' , '
+                        + (str(currentDT)) + rep_sub.encode('utf-8').replace("," , "") + '\n')
                 g.close
 
       conn.commit()
