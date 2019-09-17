@@ -27,7 +27,7 @@
 #
 # improvments
 # 
-# - add fields to be reported 
+# - add additional fields to be reported since this is only gathering URL, subjects, rcpt time.
 # - read initial rquest and parge last page as loop variable
 # - add python sqlite db creation versus manual db creation 
 #
@@ -58,15 +58,11 @@ from email import Encoders
 
 
 def send_mail(args):
-
+   """
+   Function that will email the new urls file that is created to the defined recipients. 
+   """
    sender = args.email_sender
    receivers = args.email_rcpt
-   message = """From: From sender <sender@ubuntu>
-   To: To Person <rcpt.person@todomain.com>
-   Subject: New Domains detected
-   New domains or URI's detected see attached.
-   """
-
    SUBJECT = "New Phishing domains detected"
    msg = MIMEMultipart()
    msg['Subject'] = SUBJECT
@@ -87,11 +83,17 @@ def send_mail(args):
 
 
 def single_query(args):
+   """
+   Function to write a complete log file, new urls file, as well as log details to sqlite3 
+   database. 
+   """
    triage = TriageSession(host=args.host_name, email=args.username, apikey=args.token)
+   
    if os.path.exists(args.uri_file_location):
        os.remove(args.uri_file_location)
    else:
        print('File does not exists')
+   
    f = open(args.file_location, 'w+')
    count=1
    reports = "placeholder"
@@ -100,7 +102,7 @@ def single_query(args):
       conn = sqlite3.connect(args.uri_db_location)
       c=conn.cursor()
       conn.text_factory = str
-      time.sleep(15)
+      time.sleep(15)  # this is needed or else cafense will error due to excessive requests
       for x in reports:
          cof_urls = x['email_urls']
          for y in cof_urls:
