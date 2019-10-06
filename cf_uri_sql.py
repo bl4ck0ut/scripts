@@ -46,6 +46,7 @@ import sqlite3
 from sqlite3 import Error
 import datetime 
 import os
+import csv
 import smtplib
 from os.path import basename
 from email.mime.application import MIMEApplication
@@ -69,7 +70,10 @@ def send_mail(args):
    msg['From'] = sender
    msg['To'] = ', '.join(receivers)
    part = MIMEBase('application', "octet-stream")
-   part.set_payload(open(args.uri_file_location, "rb").read())
+   try:
+      part.set_payload(open(args.uri_file_location, "rb").read())
+   except:
+       print "sorry file doesn't exist"
    Encoders.encode_base64(part)
    part.add_header('Content-Disposition', 'attachment; filename="uri.txt"')
    msg.attach(part)
@@ -80,6 +84,20 @@ def send_mail(args):
       print "Successfully sent email"
    except:
       print "Error: unable to send email"
+
+
+def ioc_dump(args):
+   '''
+   Funtion to output all the domains that have been observed for auto clickers alerting
+   '''
+   conn = sqlite3.connect(args.uri_db_location)
+   conn.text_factory = str ## my current (failed) attempt to resolve this
+   cur = conn.cursor()
+   data = cur.execute("SELECT uri FROM domains")
+   with open('/tmp/ioc_dump.csv', 'wb') as f:
+      writer = csv.writer(f)
+      writer.writerow(['domains'])
+      writer.writerows(data)
 
 
 def single_query(args):
@@ -172,7 +190,9 @@ def main():
    parser.add_argument("-j", "--email_forwarder",
         action="store", default="127.0.0.1",
         help="Server used as forwarder")
-   
+   parser.add_argument("-o", "--ioc_output",
+        action="store", default="N",
+        help="If you want to output a file for IOC injestion")   
    
    args = parser.parse_args()
   
@@ -185,6 +205,10 @@ def main():
    if args.server_list == 'single':
       single_query(args)
       send_mail(args)
+
+   if args.ioc_output == 'Y':
+       ioc_dump(args)
+
 
 if __name__ == '__main__':
    main()
