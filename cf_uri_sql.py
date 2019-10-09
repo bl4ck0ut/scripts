@@ -89,7 +89,7 @@ def send_mail(args):
 def ioc_dump(args):
    '''
    Funtion to output all the domains that have been observed for auto clickers alerting
-   doesn't sort or uniq the data
+   doesn't sort only uniq
    '''
    conn = sqlite3.connect(args.uri_db_location)
    conn.text_factory = str ## my current (failed) attempt to resolve this
@@ -105,6 +105,15 @@ def ioc_dump(args):
       z = (y[0])
       f.write(z + "\n")
    f.close()
+
+   lines_seen = set() # holds lines already seen
+   outfile = open('/tmp/ioc_dump_nodup.csv', "w")
+   for line in open('/tmp/ioc_dump.csv', "r"):
+       if line not in lines_seen: # not a duplicate
+           outfile.write(line)
+           lines_seen.add(line)
+   outfile.close()
+
 
 
 
