@@ -89,15 +89,23 @@ def send_mail(args):
 def ioc_dump(args):
    '''
    Funtion to output all the domains that have been observed for auto clickers alerting
+   doesn't sort or uniq the data
    '''
    conn = sqlite3.connect(args.uri_db_location)
    conn.text_factory = str ## my current (failed) attempt to resolve this
    cur = conn.cursor()
    data = cur.execute("SELECT uri FROM domains")
-   with open('/tmp/ioc_dump.csv', 'wb') as f:
-      writer = csv.writer(f)
-      writer.writerow(['domains'])
-      writer.writerows(data)
+   rows = cur.fetchall()
+   f = open('/tmp/ioc_dump.csv', 'wb')
+   for row in rows:
+      x= str(row)
+      y = x.split("/")
+      z = (y[2])
+      y = z.split("'")
+      z = (y[0])
+      f.write(z + "\n")
+   f.close()
+
 
 
 def single_query(args):
