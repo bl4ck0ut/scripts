@@ -97,7 +97,7 @@ sudo make install
 
 #sudo and execute silentbridge
 
-echo "export PATH=/home/kali/opt/python-2.7.15/bin:$PATH"
+echo "export PATH=/home/kali/opt/python-2.7.15/bin:\$PATH"
 
 echo "cd /home/kali/silentbridge/silentbridge"
 
