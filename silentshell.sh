@@ -40,6 +40,16 @@ sudo apt update
 sudo apt upgrade
 sudo apt install autoconf
 
+echo which interface do you want to connect to the wall
+read WALL_ETH
+
+echo which interface do you want to connect to the computer
+read COMP_ETH
+
+echo which interface do you want to use for your comms
+read COMMS_ETH
+
+
 #setup silentbridge on Kali
 mkdir ~/silentbridge
 cd ~/silentbridge
@@ -86,11 +96,14 @@ make
 sudo make install 
 
 #sudo and execute silentbridge
-echo "sudo su
-export PATH=/home/kali/opt/python-2.7.15/bin:$PATH
-cd /home/kali/silentbridge/silentbridge
-echo "python ./silentbridge --create-bridge --upstream eth0 --phy eth1 --sidechannel wlan0" 
-"
+
+echo "export PATH=/home/kali/opt/python-2.7.15/bin:$PATH"
+
+echo "cd /home/kali/silentbridge/silentbridge"
+
+echo "python ./silentbridge --create-bridge --upstream $WALL_ETH --phy $COMP_ETH --sidechannel $COMMS_ETH"
+
+echo "To destroy the bridge ./silentbridge --destroy-bridge"
 
 
 
