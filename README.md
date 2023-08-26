@@ -11,4 +11,6 @@ cf_uri_sql.py = script that coonects to Cofnese Triage and pull Date, Subject an
 
 silentshell.sh = tool used to install and setup silentbridge on Kali 2022.1
 
+dh22_esp8266_rev1.ino = arduino script to monitor my freezer wirelessly
+
 #
